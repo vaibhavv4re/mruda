@@ -3,16 +3,22 @@
 from sqlmodel import SQLModel, Session, create_engine
 from app.config import settings
 
-# Use check_same_thread=False only for SQLite
-connect_args = {}
-if settings.effective_database_url.startswith("sqlite"):
-    connect_args["check_same_thread"] = False
+db_url = settings.effective_database_url
 
-engine = create_engine(
-    settings.effective_database_url,
-    echo=False,
-    connect_args=connect_args,
-)
+# Build engine kwargs depending on backend
+engine_kwargs: dict = {"echo": False}
+
+if db_url.startswith("sqlite"):
+    # SQLite-specific: allow multi-thread access
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+else:
+    # PostgreSQL (Supabase) — serverless-friendly settings
+    engine_kwargs["pool_pre_ping"] = True  # verify conn is alive before use
+    engine_kwargs["pool_size"] = 5
+    engine_kwargs["max_overflow"] = 10
+    engine_kwargs["pool_recycle"] = 300  # recycle stale connections
+
+engine = create_engine(db_url, **engine_kwargs)
 
 
 def init_db() -> None:
