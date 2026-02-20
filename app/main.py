@@ -3,6 +3,7 @@
 Modular Real-time Unified Data Analyzer.
 """
 
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -23,15 +24,25 @@ logger = get_logger("main")
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
 
 
+IS_SERVERLESS = bool(
+    os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
+)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup and shutdown lifecycle."""
     logger.info("🚀 MRUDA starting up...")
-    init_db()
-    logger.info("Database initialized")
-    start_scheduler()
+    try:
+        init_db()
+        logger.info("Database initialized")
+    except Exception as e:
+        logger.warning(f"Database init skipped (serverless?): {e}")
+    if not IS_SERVERLESS:
+        start_scheduler()
     yield
-    stop_scheduler()
+    if not IS_SERVERLESS:
+        stop_scheduler()
     logger.info("MRUDA shut down")
 
 

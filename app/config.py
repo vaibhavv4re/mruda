@@ -1,5 +1,6 @@
 """MRUDA — Central Configuration via Pydantic Settings."""
 
+import os
 from pydantic_settings import BaseSettings
 from typing import Optional
 
@@ -36,6 +37,9 @@ class Settings(BaseSettings):
         """Return PostgreSQL URL if set, otherwise fall back to SQLite."""
         if self.database_url:
             return self.database_url
+        # Vercel has a read-only filesystem; use /tmp for SQLite
+        if os.environ.get("VERCEL"):
+            return "sqlite:////tmp/mruda.db"
         return "sqlite:///./mruda.db"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
