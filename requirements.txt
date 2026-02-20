@@ -10,3 +10,4 @@ python-dotenv==1.0.1
 openai==1.58.1
 anthropic==0.42.0
 sarvamai
+psycopg2-binary
