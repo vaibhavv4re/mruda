@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MRUDA — Intelligence Surface</title>
+  <meta name="description" content="Modular Real-time Unified Data Analyzer — Living intelligence surface for advertising performance.">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
+</head>
+<body>
+
+  <!-- ═══ LAYER 1 — Intelligence Header ═══ -->
+  <header class="intel-header" id="intel-header">
+    <div class="intel-header__inner">
+      <div class="intel-header__brand">
+        <span class="intel-header__logo">MRUDA</span>
+        <span class="intel-header__tagline">Unified Data Analyzer</span>
+      </div>
+      <div class="intel-header__status">
+        <span class="intel-header__pill" id="sync-status">
+          <span class="intel-header__dot" id="sync-dot"></span>
+          <span id="sync-text">Connecting…</span>
+        </span>
+        <span class="intel-header__pill" id="data-window">
+          📅 <span id="data-window-text">—</span>
+        </span>
+        <div class="intel-header__confidence" id="confidence-wrap">
+          <span class="intel-header__confidence-value" id="confidence-value">—</span>
+          <div class="intel-header__confidence-tooltip" id="confidence-tooltip">
+            Loading…
+          </div>
+        </div>
+        <button class="sync-btn" id="sync-btn" title="Sync Now">
+          ↻ Sync
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="surface" id="main-surface">
+
+    <!-- ═══ EMPTY STATE ═══ -->
+    <div class="empty-state" id="empty-state" style="display: none;">
+      <div class="empty-state__icon">🧠</div>
+      <h2 class="empty-state__title">MRUDA is building your intelligence baseline.</h2>
+      <p class="empty-state__message">
+        Run your first sync to begin. Trends activate after two sync cycles.
+      </p>
+      <button class="sync-btn" id="empty-sync-btn" style="font-size: 0.88rem; padding: 10px 24px;">
+        ↻ Run First Sync
+      </button>
+    </div>
+
+    <!-- ═══ INTELLIGENCE LAYERS (hidden until data loads) ═══ -->
+    <div id="intel-layers" style="display: none;">
+
+      <!-- ═══ LAYER 2 — One Sentence Truth ═══ -->
+      <section class="hero-truth animate-in stagger-1" id="hero-section">
+        <h1 class="hero-truth__sentence" id="hero-sentence"></h1>
+        <div class="hero-truth__chips" id="hero-chips"></div>
+        <p class="hero-truth__basis" id="hero-basis"></p>
+      </section>
+
+      <!-- ═══ LAYER 3 — Delta Strip ═══ -->
+      <section class="delta-strip animate-in stagger-2" id="delta-strip">
+        <!-- Populated by JS -->
+      </section>
+
+      <!-- ═══ LAYER 4 — Signal Grid ═══ -->
+      <section class="signal-grid animate-in stagger-3" id="signal-grid">
+        <!-- 4 cards populated by JS -->
+      </section>
+
+      <!-- ═══ LAYER 5 — Strategic Moves ═══ -->
+      <section class="strategic-moves animate-in stagger-4" id="strategic-moves">
+        <h2 class="section-title">Recommended Next Moves</h2>
+        <div id="moves-list"></div>
+      </section>
+
+      <!-- ═══ LAYER 6 — Conversation ═══ -->
+      <section class="conversation animate-in stagger-5" id="conversation">
+        <h2 class="section-title">Ask MRUDA</h2>
+        <div class="conversation__input-wrap">
+          <input
+            type="text"
+            class="conversation__input"
+            id="chat-input"
+            placeholder="Ask MRUDA anything…"
+            autocomplete="off"
+          >
+          <button class="conversation__send" id="chat-send" title="Send">→</button>
+        </div>
+        <div class="conversation__suggestions" id="chat-suggestions">
+          <button class="conversation__suggestion" data-q="Should we increase the budget?">Should we increase the budget?</button>
+          <button class="conversation__suggestion" data-q="Why are there no conversions yet?">Why no conversions yet?</button>
+          <button class="conversation__suggestion" data-q="Is ad fatigue starting?">Is fatigue starting?</button>
+          <button class="conversation__suggestion" data-q="What should we test next?">What should we test next?</button>
+        </div>
+        <div class="conversation__messages" id="chat-messages"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

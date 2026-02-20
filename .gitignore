@@ -1,0 +1,29 @@
+# Environment & secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+
+# Database (local dev)
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Gemini agent
+.gemini/
