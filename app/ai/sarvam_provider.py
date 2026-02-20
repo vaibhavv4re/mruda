@@ -10,7 +10,8 @@ from app.core.logging import get_logger
 
 logger = get_logger("ai.sarvam")
 
-SYSTEM_PROMPT = """You are a compliance-bound analytics interpreter for MRUDA.
+# ── Strict data-interpretation prompt (for summaries) ──
+SUMMARY_PROMPT = """You are a compliance-bound analytics interpreter for MRUDA.
 
 You are reading audited, pre-computed business metrics. Your job is INTERPRETATION ONLY.
 
@@ -33,6 +34,24 @@ FORMAT RULES:
 - Keep it under 500 words
 - Be direct and actionable
 - Always state: "Confidence Score: {exact value from data}"
+"""
+
+# ── Strategic advisor prompt (for user questions) ──
+QA_PROMPT = """You are MRUDA, an expert digital advertising strategist and analyst.
+
+You have access to real campaign performance data. Use it to give specific, actionable, and strategic answers.
+
+WHEN ANSWERING QUESTIONS:
+1. Reference actual metrics from the data (CTR, CPC, CPM, spend, clicks, etc.) to support your answer.
+2. Be STRATEGIC and CREATIVE — go beyond just reading numbers. Provide real marketing insights.
+3. If asked for campaign ideas, new strategies, or recommendations, give SPECIFIC and ACTIONABLE suggestions grounded in the data patterns you see.
+4. For budget questions, reference actual spend and cost metrics from the data.
+5. When currency values appear in the data, use them exactly as shown.
+6. If data is insufficient for the specific question, say so and suggest what data would help.
+7. If the question is about future campaigns, use the current data as a baseline to inform your recommendations.
+
+TONE: Speak like a senior marketing strategist — confident, specific, data-informed, and actionable.
+Keep answers concise but thorough. Use bullet points where helpful.
 """
 
 
@@ -58,14 +77,17 @@ class SarvamProvider(AIProvider):
         data_block = json.dumps(insight_json, indent=2)
 
         if question:
+            system_prompt = QA_PROMPT
             user_prompt = (
                 f'The user asks: "{question}"\n\n'
-                f"Answer this specific question using ONLY the data below. "
-                f"Be concise, direct, and reference specific metrics from the data. "
-                f"Do not produce a generic summary — answer the question.\n\n"
-                f"Data:\n{data_block}"
+                f"Use the campaign performance data below to give a specific, "
+                f"strategic, and actionable answer. Reference actual metrics "
+                f"where relevant, but focus on answering the question with "
+                f"real marketing insight.\n\n"
+                f"Campaign Data:\n{data_block}"
             )
         else:
+            system_prompt = SUMMARY_PROMPT
             user_prompt = (
                 f"Analyze this data and produce an executive summary:\n\n{data_block}"
             )
@@ -73,13 +95,12 @@ class SarvamProvider(AIProvider):
         try:
             response = await self.client.chat.completions(
                 messages=[
-                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ],
-                temperature=0.3,
-                max_tokens=1000,
+                temperature=0.5 if question else 0.3,
+                max_tokens=1500 if question else 1000,
             )
-            # Sarvam returns an OpenAI-compatible response structure
             return response.choices[0].message.content or "No summary generated."
         except Exception as e:
             logger.error(f"Sarvam generation failed: {e}")
