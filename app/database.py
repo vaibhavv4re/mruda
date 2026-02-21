@@ -55,7 +55,7 @@ def test_connection() -> bool:
         return True
     except Exception as e:
         logger.error(f"❌ Database connection test: FAILED — {e}")
-        return False
+        raise e
 
 
 def init_db() -> None:
