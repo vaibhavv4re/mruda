@@ -35,7 +35,12 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 MRUDA starting up...")
     logger.info(f"🌍 Environment: {'SERVERLESS' if IS_SERVERLESS else 'LOCAL'}")
     # Test connection first
-    db_ok = test_connection()
+    db_ok = False
+    try:
+        db_ok = test_connection()
+    except Exception as e:
+        logger.error(f"❌ Database connection failed during startup: {e}")
+
     if db_ok:
         try:
             init_db()
@@ -43,6 +48,7 @@ async def lifespan(app: FastAPI):
             logger.error(f"❌ Table creation failed: {e}")
     else:
         logger.error("❌ Database NOT connected — endpoints will fail")
+
     if not IS_SERVERLESS:
         start_scheduler()
     yield
