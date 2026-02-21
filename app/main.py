@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from app.database import init_db
+from app.database import init_db, test_connection, db_url
 from app.scheduler.jobs import start_scheduler, stop_scheduler
 from app.api.analysis_routes import router as analysis_router
 from app.api.meta_routes import router as meta_router
@@ -33,11 +33,16 @@ IS_SERVERLESS = bool(
 async def lifespan(app: FastAPI):
     """Startup and shutdown lifecycle."""
     logger.info("🚀 MRUDA starting up...")
-    try:
-        init_db()
-        logger.info("Database initialized")
-    except Exception as e:
-        logger.warning(f"Database init skipped (serverless?): {e}")
+    logger.info(f"🌍 Environment: {'SERVERLESS' if IS_SERVERLESS else 'LOCAL'}")
+    # Test connection first
+    db_ok = test_connection()
+    if db_ok:
+        try:
+            init_db()
+        except Exception as e:
+            logger.error(f"❌ Table creation failed: {e}")
+    else:
+        logger.error("❌ Database NOT connected — endpoints will fail")
     if not IS_SERVERLESS:
         start_scheduler()
     yield
@@ -84,4 +89,19 @@ async def health_check():
         "status": "healthy",
         "service": "mruda",
         "version": "1.0.0",
+    }
+
+
+@app.get("/debug/db", tags=["System"])
+async def debug_db():
+    """Debug endpoint — check database connectivity."""
+    from app.database import test_connection, _mask_url, db_url
+
+    connected = test_connection()
+    backend = "postgresql" if db_url.startswith("postgresql") else "sqlite"
+    return {
+        "connected": connected,
+        "backend": backend,
+        "url": _mask_url(db_url),
+        "environment": "serverless" if IS_SERVERLESS else "local",
     }
