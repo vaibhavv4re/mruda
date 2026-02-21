@@ -97,11 +97,18 @@ async def debug_db():
     """Debug endpoint — check database connectivity."""
     from app.database import test_connection, _mask_url, db_url
 
-    connected = test_connection()
+    error = None
+    connected = False
+    try:
+        connected = test_connection()
+    except Exception as e:
+        error = str(e)
+
     backend = "postgresql" if db_url.startswith("postgresql") else "sqlite"
     return {
         "connected": connected,
         "backend": backend,
         "url": _mask_url(db_url),
         "environment": "serverless" if IS_SERVERLESS else "local",
+        "error": error,
     }
